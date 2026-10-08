@@ -27,13 +27,13 @@ HƯỚNG DẪN - đọc rồi XÓA TOÀN BỘ các khối chú thích này sau k
 
 | Lần chạy | n_estimators | learning_rate | max_depth | f1_score | accuracy |
 |---|---|---|---|---|---|
-| 1 | ___ | ___ | ___ | ___ | ___ |
-| 2 | ___ | ___ | ___ | ___ | ___ |
-| 3 | ___ | ___ | ___ | ___ | ___ |
+| 1 | 100 | 0.1 | 3 | 0.710900 | 0.878000 |
+| 2 | 50 | 0.05 | 2 | 0.605128 | 0.846000 |
+| 3 | 200 | 0.1 | 5 | 0.714932 | 0.874000 |
 
-**Bộ siêu tham số đã chọn:** `n_estimators=___`, `learning_rate=___`, `max_depth=___`.
+**Bộ siêu tham số đã chọn:** `n_estimators=200`, `learning_rate=0.1`, `max_depth=5`.
 
-**Lý do:** ___
+**Lý do:** Lần 3 đạt F1 lớp dương cao nhất, 0.714932, vượt ngưỡng 0.65; lần 2 chỉ đạt 0.605128. Các lần chạy dùng cùng train_batch1, holdout và random_state=42. F1 được tính bằng `f1_score(y_eval, preds)`, không lấy trung bình giữa hai lớp. Lần 1 có accuracy cao nhất (0.878), nhưng F1 thấp hơn lần 3 (0.710900), nên chọn theo accuracy sẽ bỏ qua cấu hình có F1 tốt hơn. Lần 2 kết hợp ít cây, learning_rate nhỏ và cây nông cho kết quả thấp nhất. Giảm learning_rate thường cần tăng số cây để bù lại; tuy nhiên ba thí nghiệm thay đổi đồng thời nhiều tham số nên chưa thể tách riêng tác động của từng tham số. Cấu hình lần 3 đã được lưu vào params.yaml; model và report tương ứng được giữ lại.
 
 <!--
 Trả lời trong phần Lý do:

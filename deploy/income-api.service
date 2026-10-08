@@ -1,0 +1,17 @@
+[Unit]
+Description=Income prediction API (AWS S3)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/income-api
+Environment=HOME=/home/ubuntu
+Environment=ARTIFACT_BUCKET=income-lab-tohuythong-20261008
+Environment=AWS_DEFAULT_REGION=ap-southeast-2
+ExecStart=/home/ubuntu/income-api/.venv/bin/python /home/ubuntu/income-api/src/serve.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
