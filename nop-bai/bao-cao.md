@@ -80,7 +80,7 @@ Cần nêu được:
 
 | | f1_score | accuracy |
 |---|---|---|
-| Bước 2 (chỉ `train_batch1`) | ___ | ___ |
+| Bước 2 (chỉ `train_batch1`) | 0.714932 | 0.874000 |
 | Bước 3 (thêm `train_batch2`) | ___ | ___ |
 
 **Nhận xét:** ___
