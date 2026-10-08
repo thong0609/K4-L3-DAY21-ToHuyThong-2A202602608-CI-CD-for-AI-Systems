@@ -1,29 +1,16 @@
 # Báo Cáo Lab Day 21 - CI/CD cho AI Systems
 
-<!--
-HƯỚNG DẪN - đọc rồi XÓA TOÀN BỘ các khối chú thích này sau khi điền xong:
-
-  - Giới hạn: KHÔNG QUÁ 1 TRANG A4, tương đương khoảng 450 - 550 từ nội dung.
-  - Chỉ điền vào các chỗ ___ và các ô trong bảng. Không thêm mục mới.
-  - Viết bằng câu hoàn chỉnh, không gạch đầu dòng cụt lủn.
-  - Kiểm tra độ dài sau khi đã xóa hết chú thích:
-        wc -w nop-bai/bao-cao.md
-    và xem trước bản in bằng cách mở file trên GitHub rồi Ctrl+P / Cmd+P.
--->
-
 | | |
 |---|---|
-| Họ và tên | ___ |
-| MSSV | ___ |
+| Họ và tên | Tô Huy Thông |
+| MSSV | 2A202602608 |
 | Lớp / Khóa | K4 |
-| Repo GitHub | https://github.com/___/___ |
-| Ngày nộp | ___ |
+| Repo GitHub | https://github.com/thong0609/K4-L3-DAY21-ToHuyThong-2A202602608-CI-CD-for-AI-Systems |
+| Ngày nộp | 08/10/2026 |
 
 ---
 
 ## 1. Bộ Siêu Tham Số Đã Chọn và Lý Do
-
-<!-- Khoảng 120 - 150 từ. Điền kết quả thật từ MLflow UI ở Bước 1, tối thiểu 3 lần chạy. -->
 
 | Lần chạy | n_estimators | learning_rate | max_depth | f1_score | accuracy |
 |---|---|---|---|---|---|
@@ -33,71 +20,31 @@ HƯỚNG DẪN - đọc rồi XÓA TOÀN BỘ các khối chú thích này sau k
 
 **Bộ siêu tham số đã chọn:** `n_estimators=200`, `learning_rate=0.1`, `max_depth=5`.
 
-**Lý do:** Lần 3 đạt F1 lớp dương cao nhất, 0.714932, vượt ngưỡng 0.65; lần 2 chỉ đạt 0.605128. Các lần chạy dùng cùng train_batch1, holdout và random_state=42. F1 được tính bằng `f1_score(y_eval, preds)`, không lấy trung bình giữa hai lớp. Lần 1 có accuracy cao nhất (0.878), nhưng F1 thấp hơn lần 3 (0.710900), nên chọn theo accuracy sẽ bỏ qua cấu hình có F1 tốt hơn. Lần 2 kết hợp ít cây, learning_rate nhỏ và cây nông cho kết quả thấp nhất. Giảm learning_rate thường cần tăng số cây để bù lại; tuy nhiên ba thí nghiệm thay đổi đồng thời nhiều tham số nên chưa thể tách riêng tác động của từng tham số. Cấu hình lần 3 đã được lưu vào params.yaml; model và report tương ứng được giữ lại.
-
-<!--
-Trả lời trong phần Lý do:
-  - Vì sao bộ này tốt hơn các bộ còn lại (dựa trên f1_score, không phải accuracy)?
-  - Lần chạy có accuracy cao nhất có trùng với lần có f1_score cao nhất không?
-    Nếu không, điều đó nói lên điều gì?
-  - Bạn quan sát thấy đánh đổi nào giữa n_estimators và learning_rate?
--->
+**Lý do:** Lần 3 đạt F1 cao nhất (0.714932), vượt ngưỡng 0.65. Các lần chạy dùng cùng dữ liệu và random_state=42. Lần 1 có accuracy cao nhất (0.878) nhưng F1 thấp hơn, nên chọn theo F1. Lần 2 dùng ít cây, learning_rate nhỏ và cây nông cho kết quả thấp nhất. Giảm learning_rate thường cần tăng số cây; các thí nghiệm thay đổi đồng thời nhiều tham số nên chưa tách được tác động riêng. Cấu hình tốt nhất đã lưu vào params.yaml.
 
 ---
 
 ## 2. Vì Sao Ngưỡng Chất Lượng Đặt Trên F1 Chứ Không Phải Accuracy
 
-<!-- Khoảng 120 - 150 từ. -->
-
-___
-
-<!--
-Cần nêu được:
-  - Phân bố lớp của tập dữ liệu (tỷ lệ lớp thu nhập > 50K) và hệ quả của nó.
-  - Accuracy của một mô hình luôn trả lời "thu nhập thấp" là bao nhiêu, vì sao con số
-    đó gây hiểu nhầm.
-  - F1 của lớp dương đo điều gì mà accuracy không đo được.
-  - Vì sao KHÔNG dùng average="weighted" hay average="macro" khi gọi f1_score.
--->
+Tập Adult có khoảng 24,8% mẫu thu nhập trên 50K. Vì vậy, mô hình luôn dự đoán thu nhập thấp vẫn đạt accuracy khoảng 75,2%, dù không nhận ra mẫu dương nào. F1 lớp dương kết hợp precision và recall, phản ánh khả năng phát hiện người thu nhập cao và hạn chế dự đoán dương sai. Lab dùng `f1_score(y_eval, preds)` với lớp dương mặc định là 1. Không dùng weighted F1 vì lớp đông chi phối điểm trung bình; macro F1 cân bằng trọng số hai lớp nhưng vẫn không đo riêng lớp dương. Pipeline chỉ triển khai khi F1 đạt ít nhất 0.65. Kết quả thực tế cũng cho thấy accuracy cao nhất không đồng nghĩa F1 cao nhất.
 
 ---
 
 ## 3. Khó Khăn Gặp Phải và Cách Giải Quyết
 
-<!-- Nêu 2 - 3 khó khăn thật, mỗi ô một câu ngắn. -->
-
 | Khó khăn | Nguyên nhân | Cách giải quyết |
 |---|---|---|
-| ___ | ___ | ___ |
-| ___ | ___ | ___ |
-| ___ | ___ | ___ |
+| Mã ban đầu chưa dùng được với AWS. | Khung bài sử dụng SDK và DVC remote của GCP. | Tôi đổi sang boto3, dvc[s3] và S3 ở Sydney. |
+| Thư viện lưu trữ bị xung đột khi chuyển cloud. | gcsfs cũ yêu cầu phiên bản fsspec khác với thư viện S3. | Tôi gỡ dvc-gs, gcsfs và kiểm tra lại bằng pip check. |
+| Mẫu pipeline ghi đè model trước khi kiểm tra F1. | Bước upload model nằm trong job Train. | Tôi chuyển upload sang Release sau Quality Gate; cả bốn jobs đã xanh. |
 
 ---
 
 ## 4. So Sánh Bước 2 và Bước 3 (bắt buộc, 2 - 3 câu)
 
-<!-- Lấy số liệu từ bảng ở mục 3.6 của tasks/buoc-3.md. -->
-
 | | f1_score | accuracy |
 |---|---|---|
-| Bước 2 (chỉ `train_batch1`) | 0.714932 | 0.874000 |
-| Bước 3 (thêm `train_batch2`) | ___ | ___ |
+| Bước 2 (22.361 mẫu) | 0.714932 | 0.874000 |
+| Bước 3 (44.722 mẫu) | **0.735426** | **0.882000** |
 
-**Nhận xét:** ___
-
-<!--
-Một câu trả lời trung thực kiểu "f1 giảm 0,01 vì dữ liệu mới cùng phân phối, không mang
-thêm thông tin mới" được đánh giá cao hơn kết luận sai rằng thêm dữ liệu luôn tốt hơn.
--->
-
----
-
-## 5. Phần Bonus Đã Thực Hiện (nếu có)
-
-<!-- Xóa cả mục 5 nếu không làm bonus. Mỗi bonus tối đa 1 dòng. -->
-
-- [ ] Bonus 1 - Tracking MLflow từ xa với DagsHub: ___
-- [ ] Bonus 2 - Điều chỉnh ngưỡng quyết định: ___
-- [ ] Bonus 3 - Báo cáo precision / recall tự động: ___
-- [ ] Bonus 4 - Hoàn trả về phiên bản trước: ___
-- [ ] Bonus 5 - Cảnh báo lệch lạc dữ liệu: ___
+**Nhận xét:** Sau khi bổ sung 22.361 mẫu từ `train_batch2`, F1 tăng từ 0.714932 lên 0.735426 (+0.0205) và accuracy từ 0.874 lên 0.882. Điều này cho thấy dữ liệu mới cùng phân phối với batch đầu (cùng nguồn Adult Dataset) nên mô hình học thêm được thông tin hữu ích, dẫn đến cải thiện nhẹ. Trong trường hợp hai batch cùng phân phối, gấp đôi dữ liệu thường chỉ dao động trong khoảng nhỏ — kết quả ở đây là tích cực, F1 tăng và vẫn vượt ngưỡng 0.65. Quan trọng hơn cả, pipeline tự động chạy lại hoàn toàn khi commit dữ liệu mới, không cần thao tác thủ công nào.
